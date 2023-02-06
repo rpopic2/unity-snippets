@@ -11,4 +11,4 @@ Feel free to use my code, as long as you maintain the header of the source code 
 
 ## SceneSwitcherEditorWindow.cs
 
-A simple scene switcher. It lists all scenes added to the build settings in a window.
+A simple scene switcher. It lists all scenes added to the build settings.
