@@ -1,4 +1,14 @@
 # unity-snippets
+
 Useful Unity Engine code snippets.
 
-Autor: rpopic2
+Feel free to use my code, as long as you maintain the header of the source code as follows:
+```
+// Autor: rpopic2
+// Last Modified: (date)
+// Description: (description)
+```
+
+## SceneSwitcherEditorWindow.cs
+
+A simple scene switcher. It lists all scenes added to the build settings in a window.
