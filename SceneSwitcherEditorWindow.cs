@@ -12,7 +12,7 @@ public class SceneSwitcherEditorWindow : EditorWindow
     [MenuItem("Tools/SceneSwitcher")]
     private static void Init()
     {
-        EditorWindow.GetWindow(typeof(SceneSwitcherEditorWindow), false, "씬 전환기", true);
+        EditorWindow.GetWindow(typeof(SceneSwitcherEditorWindow), false, "Scene Switcher", true);
     }
     private void OnEnable()
     {
