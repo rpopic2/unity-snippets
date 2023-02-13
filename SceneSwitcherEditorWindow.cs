@@ -1,5 +1,5 @@
-// Author: rpopic2 (github.com/rpopic2)
-// Last Modified: 2023-02-06
+// Author: rpopic2 (github.com/rpopic2/unity-snippets)
+// Last Modified: 2023-02-13
 // Description: A simple scene switcher window for Unity Editor
 using UnityEditor;
 using UnityEngine;
@@ -34,6 +34,7 @@ public class SceneSwitcherEditorWindow : EditorWindow
     }
     private void Refresh()
     {
+        scenes.Clear();
         foreach (var s in EditorBuildSettings.scenes)
         {
             var path = s.path;
