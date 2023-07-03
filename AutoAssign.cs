@@ -1,9 +1,10 @@
 // Feel free to use or modify my code, as long as you maintain this header.
 // Autor: rpopic2 (github.com/rpopic2/unity-snippets)
 // Last Modified: 3 July 2023
-// Description: Binds gameobjects to scripts by names.
+// Description: Automatically assign gameobjects to scripts.
 // 1. Add [Bind("gameObject_name")] attribute to your instance fields.
-// 2. The gameobjects will be assigned on script assembly reload.
+// 2. For private fields, you'll need to also add [SerializeField] attribute.
+// 3. The gameobjects will be assigned on script assembly reload.
 
 #nullable enable
 using System;
@@ -14,20 +15,20 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-public class Binder : EditorWindow
+public class AutoAssign : EditorWindow
 {
 // private:
-    static Binder() {
+    static AutoAssign() {
         AssemblyReloadEvents.afterAssemblyReload += Bind;
     }
 
     static Dictionary<Type, UnityEngine.Object[]?> _cache = new();
 
     static void Bind() {
-        println("Start binding");
+        println("Start assigning");
 
         // Find all classes which derive from MonoBehaviour
-        var asm = typeof(BindAttribute).Assembly;
+        var asm = typeof(AssignAttribute).Assembly;
         var types = asm.GetTypes()
             .Where(x =>
                     x.BaseType == typeof(MonoBehaviour));
@@ -42,14 +43,14 @@ public class Binder : EditorWindow
 
             foreach (var f in fields) {
                 var s  = f.CustomAttributes;
-                var attributes = f.GetCustomAttribute<BindAttribute>();
+                var attributes = f.GetCustomAttribute<AssignAttribute>();
                 UnityEngine.Object? targetGameObject = null;
                 Type targetType = f.FieldType;
                 if (!targetType.IsSubclassOf(typeof(UnityEngine.Object)))
                     continue;
 
                 string? targetName = null;
-                if (attributes is BindAttribute att) {
+                if (attributes is AssignAttribute att) {
                     targetName = att.GameObjectName;
                     if (!_cache.ContainsKey(targetType)) {
                         _cache.Add(targetType, GameObject.FindObjectsOfType(targetType, true));
@@ -68,38 +69,37 @@ public class Binder : EditorWindow
                 }
 
                 foreach (var g in gos) {
-                    var so = new SerializedObject(g);
                     f.SetValue(g, targetGameObject);
                     println($"Assign {targetGameObject?.name} to {g.name}");
                 }
             }
         }
         EditorSceneManager.MarkAllScenesDirty();
-        println("Done binding");
+        println("Done assigning");
     }
 
     void OnGUI() {
-        if (GUILayout.Button("Bind")) {
+        if (GUILayout.Button("Assign")) {
             Bind();
         }
     }
 
-    [MenuItem("Window/BindManager")]
+    [MenuItem("Window/AutoAssign")]
     static void InitWindow() {
-        EditorWindow.GetWindow<Binder>();
+        EditorWindow.GetWindow<AutoAssign>();
     }
 
     static void println(string s) {
-        Debug.Log($"[BindManager] {s}");
+        Debug.Log($"[AutoAssign] {s}");
     }
 }
 
-class BindAttribute : Attribute
+class AssignAttribute : Attribute
 {
 // public:
     public string GameObjectName { get; private set; }
 
-    public BindAttribute(string gameObjectName) {
+    public AssignAttribute(string gameObjectName) {
         GameObjectName = gameObjectName;
     }
 }
