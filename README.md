@@ -14,6 +14,13 @@ Feel free to use my code, as long as you maintain the header of the source code 
 
 A simple scene switcher. It lists all scenes added to the build settings.
 
+## Binder.cs
+Automatically assign gameobjects to scripts.
+1. Add [Bind("gameObject_name")] attribute to your instance fields.
+2. For private fields, you'll need to also add [SerializeField] attribute.
+3. The gameobjects will be assigned on script assembly reload.
+  
+  
 
 ## KoreanFileNameFixer.cs
 
