@@ -1,6 +1,6 @@
 // Feel free to use or modify my code, as long as you maintain this header.
 // Autor: rpopic2 (github.com/rpopic2/unity-snippets)
-// Last Modified: 3 July 2023
+// Last Modified: 14 July 2023
 // Description: Automatically assign gameobjects to scripts.
 // 1. Add [Assign("gameObject_name")] attribute to your instance fields.
 // 2. For private fields, you'll need to also add [SerializeField] attribute.
