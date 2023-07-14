@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -93,6 +94,7 @@ public class AutoAssign : EditorWindow
         Debug.Log($"[AutoAssign] {s}");
     }
 }
+#endif
 
 class AssignAttribute : Attribute
 {
@@ -103,4 +105,3 @@ class AssignAttribute : Attribute
         GameObjectName = gameObjectName;
     }
 }
-
