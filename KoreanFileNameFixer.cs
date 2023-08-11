@@ -1,6 +1,6 @@
 // Feel free to use or modify my code, as long as you maintain this header.
 // Autor: rpopic2 (github.com/rpopic2/unity-snippets)
-// Last Modified: 26 May 2023
+// Last Modified: 11 Aug 2023
 // Description: This script renames all files in a given directory to their normalized names to fix issues with Korean file names.
 using UnityEditor;
 using UnityEngine;
@@ -8,13 +8,13 @@ using UnityEngine;
 public class KoreanFileNameFixer : EditorWindow
 {
 // private:
-    string _searchFilter = string.Empty;
-    string _searchDirectory = string.Empty;
+    string _searchFilter = "t:texture2D";
+    string _searchDirectory = "Assets/Sprites/";
     string[] _stringDirectoryTokens = new string[1] { string.Empty };
 
     [MenuItem("Window/한국어 파일이름 고치기")]
     static void Window() {
-        EditorWindow.GetWindow(typeof(KoreanFileNameFixer), true, "한국어 파일이름 고치기", true);
+        EditorWindow.GetWindow(typeof(KoreanFileNameFixer), false, "한국어 파일이름 고치기", true);
     }
 
     void OnGUI() {
@@ -40,9 +40,13 @@ public class KoreanFileNameFixer : EditorWindow
             var path = AssetDatabase.GUIDToAssetPath(name);
             var slashIndex = path.LastIndexOf('/');
             var fileName = path[(slashIndex + 1)..];
-            Debug.Log($"Renaming {fileName}");
-            fileName = fileName.Normalize(System.Text.NormalizationForm.FormC);
-            AssetDatabase.RenameAsset(path, fileName);
+
+            var norm = fileName.IsNormalized(System.Text.NormalizationForm.FormC);
+            if (!norm) {
+                fileName = fileName.Normalize(System.Text.NormalizationForm.FormC);
+                AssetDatabase.RenameAsset(path, fileName);
+                Debug.Log($"Renaming {fileName}");
+            }
         }
     }
 }
