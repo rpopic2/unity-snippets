@@ -1,58 +1,63 @@
 // Feel free to use or modify my code, as long as you maintain this header.
 // Autor: rpopic2 (github.com/rpopic2/unity-snippets)
-// Last Modified: 14 July 2023
+// Last Modified: 7 Aug 2023
 // Description: Automatically assign gameobjects to scripts.
-// 1. Add [Assign("gameObject_name")] attribute to your instance fields.
+// 1. Add [Bind] attribute to your instance fields. Make sure the name of the field is equal to the name of the GameObject to be assigned.
 // 2. For private fields, you'll need to also add [SerializeField] attribute.
 // 3. The gameobjects will be assigned on script assembly reload.
 
 #nullable enable
 using System;
+using System.Diagnostics;
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-public class AutoAssign : EditorWindow
+class AutoAssign : EditorWindow
 {
-// private:
-    static AutoAssign() {
+    static readonly Dictionary<Type, UnityEngine.Object[]?> _cache = new();
+    static readonly Assembly _asm = typeof(AutoAssign).Assembly;
+
+    static AutoAssign()
+    {
         AssemblyReloadEvents.afterAssemblyReload += Bind;
     }
 
-    static Dictionary<Type, UnityEngine.Object[]?> _cache = new();
+    static IEnumerable<Type> GetTypes()
+    {
+        return _asm.GetTypes().Where(
+            x => x.BaseType == typeof(MonoBehaviour)
+        );
+    }
 
-    static void Bind() {
-        println("Start assigning");
+    static void Bind()
+    {
+        bool isDirty = false;
 
-        // Find all classes which derive from MonoBehaviour
-        var asm = typeof(AssignAttribute).Assembly;
-        var types = asm.GetTypes()
-            .Where(x =>
-                    x.BaseType == typeof(MonoBehaviour));
-
-        foreach (var t in types) {
-            var fields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-
-            // Find all gameobjects with that type
+        foreach (var t in GetTypes()) {
+            if (t.IsGenericType)
+                continue;
             var gos = GameObject.FindObjectsOfType(t);
-            if (gos.Length < 1)
+            if (gos.Length <= 0)
                 continue;
 
+            var fields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+
             foreach (var f in fields) {
-                var s  = f.CustomAttributes;
-                var attributes = f.GetCustomAttribute<AssignAttribute>();
-                UnityEngine.Object? targetGameObject = null;
                 Type targetType = f.FieldType;
                 if (!targetType.IsSubclassOf(typeof(UnityEngine.Object)))
                     continue;
 
-                string? targetName = null;
-                if (attributes is AssignAttribute att) {
-                    targetName = att.GameObjectName;
+                BindAttribute attributes = f.GetCustomAttribute<BindAttribute>();
+                UnityEngine.Object? targetGameObject = null;
+
+                if (attributes is BindAttribute att) {
+                    var targetName = f.Name;
                     if (!_cache.ContainsKey(targetType)) {
                         _cache.Add(targetType, GameObject.FindObjectsOfType(targetType, true));
                     }
@@ -70,17 +75,21 @@ public class AutoAssign : EditorWindow
                 }
 
                 foreach (var g in gos) {
+                    if (f.GetValue(g) == (object?)targetGameObject) {
+                        continue;
+                    }
                     f.SetValue(g, targetGameObject);
                     println($"Assign {targetGameObject?.name} to {g.name}");
+                    isDirty = true;
                 }
             }
         }
-        EditorSceneManager.MarkAllScenesDirty();
-        println("Done assigning");
+        if (isDirty)
+            EditorSceneManager.MarkAllScenesDirty();
     }
 
     void OnGUI() {
-        if (GUILayout.Button("Assign")) {
+        if (GUILayout.Button("Bind")) {
             Bind();
         }
     }
@@ -96,12 +105,7 @@ public class AutoAssign : EditorWindow
 }
 #endif
 
-class AssignAttribute : Attribute
-{
-// public:
-    public string GameObjectName { get; private set; }
 
-    public AssignAttribute(string gameObjectName) {
-        GameObjectName = gameObjectName;
-    }
-}
+[Conditional("UNITY_EDITOR")]
+class BindAttribute : Attribute { }
+
