@@ -1,5 +1,5 @@
-// Author: rpopic2 (github.com/rpopic2/unity-snippets)
-// Last Modified: 2023-02-13
+// Author: rpopic2 (github.com/rpopic2)
+// Last Modified: 2024-04-15
 // Description: A simple scene switcher window for Unity Editor
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public class SceneSwitcherEditorWindow : EditorWindow
 {
     private Dictionary<string, string> scenes = new Dictionary<string, string>();
-    [MenuItem("Tools/SceneSwitcher")]
+    [MenuItem("NOAH/SceneSwitcher")]
     private static void Init()
     {
         EditorWindow.GetWindow(typeof(SceneSwitcherEditorWindow), false, "Scene Switcher", true);
@@ -24,6 +24,24 @@ public class SceneSwitcherEditorWindow : EditorWindow
         {
             if (GUILayout.Button(name, GUILayout.Height(30)))
             {
+                var dirty = false;
+                for (int i = 0; i < EditorSceneManager.sceneCount; ++i) {
+                    if (EditorSceneManager.GetSceneAt(i).isDirty) {
+                        dirty = true;
+                        break;
+                    }
+                }
+                if (dirty) {
+                    var ok = EditorUtility.DisplayDialog("Warning", "Do you want to save all open scenes?", "Yes", "No");
+                    if (ok) {
+                        for (int i = 0; i < EditorSceneManager.sceneCount; ++i) {
+                            var scene = EditorSceneManager.GetSceneAt(i);
+                            EditorSceneManager.SaveScene(scene);
+                        }
+                    } else {
+                        return;
+                    }
+                }
                 EditorSceneManager.OpenScene(path);
             }
         }
@@ -42,5 +60,6 @@ public class SceneSwitcherEditorWindow : EditorWindow
             var sceneName = path.Substring(slashLastIndex + 1, path.LastIndexOf('.') - slashLastIndex - 1);
             scenes.Add(sceneName, path);
         }
+        scenes.Add("Editor", "Assets/Scenes/Editor.unity");
     }
 }
