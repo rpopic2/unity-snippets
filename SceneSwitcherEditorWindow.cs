@@ -1,5 +1,5 @@
 // Author: rpopic2 (github.com/rpopic2)
-// Last Modified: 2024-04-15
+// Last Modified: 2024-04-23
 // Description: A simple scene switcher window for Unity Editor
 using UnityEditor;
 using UnityEngine;
@@ -32,7 +32,7 @@ public class SceneSwitcherEditorWindow : EditorWindow
                     }
                 }
                 if (dirty) {
-                    var ok = EditorUtility.DisplayDialog("Warning", "Do you want to save all open scenes?", "Yes", "No");
+                    var ok = EditorUtility.DisplayDialog("Warning", "Do you want to save all open scenes?", "Yes", "Cancel");
                     if (ok) {
                         for (int i = 0; i < EditorSceneManager.sceneCount; ++i) {
                             var scene = EditorSceneManager.GetSceneAt(i);
